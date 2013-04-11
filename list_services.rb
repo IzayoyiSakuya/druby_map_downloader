@@ -1,6 +1,8 @@
 require 'rinda/ring'
 
-DRb.start_service
+require_relative 'netUtil'
+
+DRb.start_service(get_available_druby_addr)
 #ring_finger = Rinda::RingFinger.new(['192.168.17.190','localhost'], 51499)
 #puts ring_finger.primary.inspect
 #puts ring_finger.lookup_ring_any.inspect
