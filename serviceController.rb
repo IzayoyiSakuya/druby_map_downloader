@@ -43,8 +43,12 @@ class ServiceController
 			end
 
 			list_to_process = @keys[beginIdx..endIdx]
-
-			downloader = find_available_downloader
+			downloader = nil
+			begin
+				downloader = find_available_downloader
+			rescue Exception => ex
+				puts "#{ex}"
+			end
 			
 			if downloader
 				downloader.process list_to_process
@@ -61,9 +65,12 @@ end
 if __FILE__ == $0
 	endlevel = 12
 	endlevel = Integer(ARGV[0]) if ARGV.length > 0
+	startrow = 0
+	startrow = Integer(ARGV[1]) if ARGV.length > 1
+	
 	
 	DRb.start_service(get_available_druby_addr)
 	s = ServiceController.new "nehalam.data", endlevel
-	s.start_process
+	s.start_process(startrow)
 	#s.start_process(0,10)
 end
