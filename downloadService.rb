@@ -40,7 +40,7 @@ class DownloadService
 		@logger = ring_server.read([:name, :RindaLogger, nil, nil])[2]
 		puts "ring_finger read"	
 		#puts "logger_uri=>#{logger_uri.__drburi}"
-		@logger = DRbObject.new nil, logger_uri.__drburi
+		#@logger = DRbObject.new nil, logger_uri.__drburi
 	end
 
 		
