@@ -3,6 +3,9 @@ require 'drb'
 require 'rinda/ring'
 require 'rinda/tuplespace'
 
+require_relative 'netUtil'
+
+
 class ServiceController
 	def initialize(filename, level = 12)
 		@ring_server = Rinda::RingFinger.primary	
@@ -55,7 +58,12 @@ class ServiceController
 	end	
 end
 
-DRb.start_service("druby://192.168.17.190:32874")
-s = ServiceController.new "nehalam.data"
-s.start_process
-#s.start_process(0,10)
+if __FILE__ == $0
+	endlevel = 12
+	endlevel = Integer(ARGV[0]) if ARGV.length > 0
+	
+	DRb.start_service(get_available_druby_addr)
+	s = ServiceController.new "nehalam.data", endlevel
+	s.start_process
+	#s.start_process(0,10)
+end
