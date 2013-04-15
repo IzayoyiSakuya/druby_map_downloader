@@ -52,7 +52,7 @@ class ServiceController
 			
 			if downloader
 				downloader.process list_to_process
-				puts "#{endIdx} / #{endEntry-startEntry} is processing..."
+				puts "#{endIdx} / #{endEntry} is processing..."
 				@next_process = endIdx+1	
 				finish = true if @next_process > endEntry 
 			else

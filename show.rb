@@ -5,7 +5,7 @@ open("nehalam.data") do |file|
 	file.each_line do |line|
 		count = count + 1
 		a = line.tr"\n",""
-		break if a.length > 15
+	#	break if a.length > 15
 	end
 	puts count
 end

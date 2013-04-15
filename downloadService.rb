@@ -4,6 +4,8 @@ require 'mysql'
 require 'drb'
 require 'rinda/ring'
 require 'rinda/tuplespace'
+require 'mogilefs'
+
 
 require_relative 'BingTile'
 require_relative 'netUtil'
@@ -32,6 +34,11 @@ class DownloadService
 		@busy = false
 		@dict = Hash.new
 		@tileUtil = TileSystem.new
+		@domain = 'bing_map'
+		@hosts = %w[192.168.17.201:7001]
+		@mg = MogileFS::MogileFS.new(:domain => 'bing_map', :hosts => @hosts)
+		
+
 		puts "service_started"
 		ring_server = Rinda::RingFinger.primary
 #		ring_finger = Rinda::RingFinger.new(['192.168.17.190','localhost'], 12315)
@@ -107,14 +114,16 @@ class DownloadService
 	def save_to_db(results)
 	
 		begin 
-			con = Mysql.new '192.168.17.180','admin','hky123456','bing_map'
+#			con = Mysql.new '192.168.17.180','admin','hky123456','bing_map'
 #			con.set_server_option Mysql::OPTION_MULTI_STATEMENTS_ON
 #			con.autocommit false
-			pst = nil
+#			pst = nil
 	#		pst = con.prepare("INSERT INTO tiles (zoom_level,tile_column, tile_row, tile_data) VALUES (?,?,?,?)") 
 #SET zoom_level = ? tile_column = ? tile_row = ? tile_data = ?")
 			
 			results.keys.each do |key|
+				@mg.store_content("#{key}.png",'bing_map', results[key])
+=begin
 				data = results[key]
 				tileX, tileY, lod = @tileUtil.quadKeyToTileXY(key)
 
@@ -134,6 +143,7 @@ class DownloadService
 				
 				pst = con.prepare("insert into tiles set #{zoomlevelStr}, #{columnStr}, #{rowStr}, #{dataStr}");
 				pst.execute 
+=end
 			end
 #			con.commit
 
@@ -143,8 +153,8 @@ class DownloadService
 #			con.rollback
 
 		ensure
-			pst.close if pst
-			con.close if con
+#			pst.close if pst
+#			con.close if con
 			@busy = false
 		end		
 
