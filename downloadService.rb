@@ -106,6 +106,29 @@ class DownloadService
 		end
 	end
 
+	def process_from_mysql(startIdx,endIdx)
+		@busy = true
+		Thread.new do 		
+		@dict = Hash.new
+		count = endIdx - startIdx + 1
+		count = 0 if count < 0
+		con = Mysql.new '192.168.17.180','admin','hky123456','bing_map'
+		con.set_server_option Mysql::OPTION_MULTI_STATEMENTS_ON
+		rs = con.query "select * from tiles LIMIT #{startIdx},#{count}"
+		rs.each_hash do |row|
+			tileY = Integer(row['tile_row'])
+			tileX = Integer(row['tile_column'])
+			zoom =  Integer(row['zoom_level'])
+			data =  row['tile_data']	
+			tileY = (2**Integer(zoom) - 1) - Integer(tileY)
+			quadKey = @tileUtil.tileXYToQuadKey(tileX, tileY, zoom)
+			@dict[quadKey] = data	
+		end
+		
+		save_to_db(@dict)	
+		end
+	end
+
 	def transform_data(key, data)
 		#make picture in current place.
 

@@ -30,6 +30,36 @@ class ServiceController
 		end			
 		downloader
 	end
+	def start_process_mysql(startEntry, endEntry)
+		puts "starting process mysql data to mogileFS"
+		finish = false
+		@next_process = startEntry	
+		while(not finish) do 
+			beginIdx = @next_process
+			endIdx = beginIdx + @batch_count
+			if (endIdx > endEntry)
+				endIdx = endEntry
+				finish = true
+			end
+
+			#list_to_process = @keys[beginIdx..endIdx]
+			downloader = nil
+			begin
+				downloader = find_available_downloader
+			rescue Exception => ex
+				puts "#{ex}"
+			end
+			
+			if downloader
+				downloader.process_from_mysql(beginIdx,endIdx) 
+				puts "#{endIdx} / #{endEntry} is processing..."
+				@next_process = endIdx+1	
+				finish = true if @next_process > endEntry 
+			else
+				sleep(10.0)
+			end		
+		end
+	end	
 
 	def start_process(startEntry=0, endEntry=@keys.length)
 		finish = false
@@ -67,10 +97,13 @@ if __FILE__ == $0
 	endlevel = Integer(ARGV[0]) if ARGV.length > 0
 	startrow = 0
 	startrow = Integer(ARGV[1]) if ARGV.length > 1
+	endrow = -1
+	endrow = Integer(ARGV[2]) if ARGV.length > 2
 	
 	
 	DRb.start_service(get_available_druby_addr)
 	s = ServiceController.new "nehalam.data", endlevel
-	s.start_process(startrow)
+	s.start_process(startrow) if ARGV.length == 2
+	s.start_process_mysql(startrow, endrow) if ARGV.length == 3
 	#s.start_process(0,10)
 end
